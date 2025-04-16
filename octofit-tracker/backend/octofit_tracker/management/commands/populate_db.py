@@ -1,27 +1,40 @@
 from django.core.management.base import BaseCommand
-from tracker.models import User, Team, Activity, Leaderboard, Workout
+from pymongo import MongoClient
 
 class Command(BaseCommand):
-    help = 'Populate the database with test data'
+    help = 'Populate the MongoDB database with test data'
 
     def handle(self, *args, **kwargs):
-        # Create test users
-        user1 = User.objects.create(email='john.doe@example.com', name='John Doe', age=16)
-        user2 = User.objects.create(email='jane.smith@example.com', name='Jane Smith', age=17)
+        client = MongoClient('mongodb://localhost:27017/')
+        db = client['octofit_db']
 
-        # Create test teams
-        team1 = Team.objects.create(name='Team Alpha')
-        team1.members.add(user1, user2)
+        # Insert test users
+        users = db.users
+        users.insert_many([
+            {"email": "john.doe@example.com", "name": "John Doe", "age": 16},
+            {"email": "jane.smith@example.com", "name": "Jane Smith", "age": 17}
+        ])
 
-        # Create test activities
-        Activity.objects.create(user=user1, type='Running', duration=30, date='2025-04-01')
-        Activity.objects.create(user=user2, type='Walking', duration=45, date='2025-04-02')
+        # Insert test teams
+        teams = db.teams
+        teams.insert_one({"name": "Team Alpha", "members": ["john.doe@example.com", "jane.smith@example.com"]})
 
-        # Create test leaderboard entries
-        Leaderboard.objects.create(user=user2, points=150)
+        # Insert test activities
+        activities = db.activities
+        activities.insert_many([
+            {"user": "john.doe@example.com", "type": "Running", "duration": 30, "date": "2025-04-01"},
+            {"user": "jane.smith@example.com", "type": "Walking", "duration": 45, "date": "2025-04-02"}
+        ])
 
-        # Create test workouts
-        Workout.objects.create(name='Morning Yoga', description='A relaxing yoga session', duration=60)
-        Workout.objects.create(name='HIIT', description='High-intensity interval training', duration=30)
+        # Insert test leaderboard entries
+        leaderboard = db.leaderboard
+        leaderboard.insert_one({"user": "jane.smith@example.com", "points": 150})
 
-        self.stdout.write(self.style.SUCCESS('Successfully populated the database with test data'))
+        # Insert test workouts
+        workouts = db.workouts
+        workouts.insert_many([
+            {"name": "Morning Yoga", "description": "A relaxing yoga session", "duration": 60},
+            {"name": "HIIT", "description": "High-intensity interval training", "duration": 30}
+        ])
+
+        self.stdout.write(self.style.SUCCESS('Successfully populated the MongoDB database with test data'))

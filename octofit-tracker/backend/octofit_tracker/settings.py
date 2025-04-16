@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from pymongo import MongoClient
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -73,15 +74,21 @@ WSGI_APPLICATION = "octofit_tracker.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# MongoDB Database Configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'octofit_db',
-    }
-}
+# Ensure pymongo is properly imported and MongoDB connection is set up
+from pymongo import MongoClient
 
-# CORS Configuration
+# MongoDB connection setup
+MONGO_CLIENT = MongoClient('mongodb://localhost:27017/')
+MONGO_DB = MONGO_CLIENT['octofit_db']
+
+# Remove djongo database engine configuration
+DATABASES = {}
+
+
+# Allow all hosts
+ALLOWED_HOSTS = ['*']
+
+# Enable CORS
 INSTALLED_APPS += [
     'corsheaders',
 ]
@@ -90,19 +97,11 @@ MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS',
+    'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'
 ]
 CORS_ALLOW_HEADERS = [
-    '*',
+    'content-type', 'authorization', 'x-csrftoken'
 ]
-
-# Allow all hosts
-ALLOWED_HOSTS = ['*']
 
 
 # Password validation
