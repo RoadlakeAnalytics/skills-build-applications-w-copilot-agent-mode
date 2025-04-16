@@ -18,7 +18,6 @@ class Command(BaseCommand):
         Activity.objects.create(user=user2, type='Walking', duration=45, date='2025-04-02')
 
         # Create test leaderboard entries
-        Leaderboard.objects.create(user=user1, points=100)
         Leaderboard.objects.create(user=user2, points=150)
 
         # Create test workouts
